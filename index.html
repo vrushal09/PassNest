@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager</title>
+    <script>
+         // Redirect to login if the user is not logged in
+         if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <!-- CryptoJS Library for AES encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Manager</h1>
+        <form id="passwordForm">
+            <input type="text" id="serviceName" placeholder="Service Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Add Password</button>
+        </form>
+        
+        <div class="password-list-wrapper">
+            <div id="passwordList"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Password Manager</title>
+    <style>
+        
+        /* General styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        /* Container styling */
+        .container {
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Heading style */
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        /* Input styling */
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* Button styling */
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Error message */
+        .error-message {
+            color: #e74c3c;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 0.9em;
+        }
+
+        /* Reset button */
+        .reset-button {
+            margin-top: 1rem;
+            background-color: #e74c3c;
+        }
+
+        .reset-button:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <input type="password" id="pin" placeholder="Enter your PIN" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="errorMessage" class="error-message"></p>
+        <button id="resetPinBtn" class="reset-button">Reset PIN</button>
+    </div>
+    <script>
+        // Check if a PIN is set, if not, prompt the user to set one
+        if (!localStorage.getItem('pin')) {
+            const newPin = prompt("Set your PIN for the first time:");
+            if (newPin) {
+                localStorage.setItem('pin', newPin); // Save the new PIN
+            }
+        }
+
+        // Handle the login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pinInput = document.getElementById('pin').value;
+
+            // Retrieve the current PIN from local storage
+            const storedPin = localStorage.getItem('pin');
+
+            if (pinInput === storedPin) {
+                // Set login status in sessionStorage
+                sessionStorage.setItem('loggedIn', 'true');
+                
+                // Redirect to main password manager page if PIN is correct
+                window.location.href = 'index.html';
+            } else {
+                // Show error message if PIN is incorrect
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'Incorrect PIN. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Handle the PIN reset
+        document.getElementById('resetPinBtn').addEventListener('click', function() {
+            const oldPin = prompt("Enter your old PIN:");
+            
+            // Retrieve the current PIN from local storage
+            const storedPin = localStorage.getItem('pin');
+
+            if (oldPin === storedPin) {
+                const newPin = prompt("Enter your new PIN:");
+                if (newPin) {
+                    localStorage.setItem('pin', newPin); // Save the new PIN
+                    alert('PIN has been reset successfully!');
+                }
+            } else {
+                alert('Old PIN is incorrect. Reset failed.');
+            }
+        });
+    </script>
+</body>
+</html>
