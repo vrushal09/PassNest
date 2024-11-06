@@ -1,4 +1,4 @@
-/* General styling */
+/* General Reset */
 * {
     margin: 0;
     padding: 0;
@@ -6,54 +6,66 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #f0f2f5, #dfe3e8);
 }
 
+/* Container Styling */
 .container {
     width: 90%;
-    max-width: 400px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-h1 {
-    font-size: 1.5em;
-    color: #333;
-    margin-bottom: 20px;
+    max-width: 450px;
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-form input, form button {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    font-size: 1em;
+/* Header Styling */
+h1 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-bottom: 1.5rem;
 }
 
+/* Form Styling */
+form input, form button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+form input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Styling */
 form button {
-    background-color: #4caf50;
-    color: #fff;
+    background-color: #007bff;
+    color: #ffffff;
     border: none;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s;
 }
 
 form button:hover {
-    background-color: #45a049;
+    background-color: #0056b3;
 }
 
-/* Scrollable password list */
+/* Password List Styling */
 .password-list-wrapper {
-    max-height: 300px; /* Set a fixed height for the scrollable area */
+    max-height: 300px;
     overflow-y: auto;
     margin-top: 20px;
     border-top: 1px solid #ddd;
@@ -71,9 +83,6 @@ form button:hover {
 .password-item .details {
     display: flex;
     flex-direction: column;
-}
-
-.password-item .details span {
     font-size: 0.9em;
 }
 
@@ -85,14 +94,14 @@ form button:hover {
 }
 
 .password-item .copy-btn {
-    color: #4caf50;
+    color: #007bff;
 }
 
 .password-item .delete-btn {
     color: #e53935;
 }
 
-/* Scrollbar styling */
+/* Scrollbar Styling */
 .password-list-wrapper::-webkit-scrollbar {
     width: 6px;
 }
