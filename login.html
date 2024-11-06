@@ -4,95 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Password Manager</title>
-    <style>
-        /* General Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f2f5, #dfe3e8);
-        }
-        
-        /* Container Styling */
-        .container {
-            max-width: 400px;
-            width: 90%;
-            padding: 2rem;
-            background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        
-        /* Heading Style */
-        h1 {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Input Styling */
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 1em;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-        
-        /* Button Styling */
-        button {
-            width: 100%;
-            padding: 12px;
-            font-size: 1em;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #0056b3;
-        }
-        
-        /* Error Message Styling */
-        .error-message {
-            color: #e74c3c;
-            margin-top: 0.5rem;
-            display: none;
-            font-size: 0.9em;
-        }
-        
-        /* Reset Button Styling */
-        .reset-button {
-            margin-top: 1rem;
-            background-color: #e74c3c;
-        }
-        
-        .reset-button:hover {
-            background-color: #c82333;
-        }
-
-    </style>
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <div class="container">
@@ -105,11 +17,80 @@
         <button id="resetPinBtn" class="reset-button">Reset PIN</button>
     </div>
     <script>
+        // Function to encrypt the PIN
+        async function encryptPIN(pin, key) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pin);
+
+            // Generate an initialization vector (IV) for encryption
+            const iv = crypto.getRandomValues(new Uint8Array(12)); // 12 bytes for AES-GCM
+
+            const algorithm = {
+                name: 'AES-GCM',
+                iv: iv
+            };
+
+            const encryptedData = await crypto.subtle.encrypt(algorithm, key, data);
+            
+            // Return both the encrypted data and the IV (for decryption later)
+            const encryptedArray = new Uint8Array(encryptedData);
+            const result = new Uint8Array(iv.length + encryptedArray.length);
+            result.set(iv);
+            result.set(encryptedArray, iv.length);
+            return result;
+        }
+
+        // Function to decrypt the PIN
+        async function decryptPIN(encryptedData, key) {
+            const iv = encryptedData.slice(0, 12); // Extract the IV from the beginning
+            const data = encryptedData.slice(12); // Extract the encrypted PIN
+
+            const algorithm = {
+                name: 'AES-GCM',
+                iv: iv
+            };
+
+            const decryptedData = await crypto.subtle.decrypt(algorithm, key, data);
+
+            const decoder = new TextDecoder();
+            return decoder.decode(decryptedData);
+        }
+
+        // Generate or retrieve a secret encryption key (this should be kept safe)
+        async function getKey() {
+            // This is a simple way to generate a key for demo purposes, but in a real app, 
+            // you should use a better method of key generation and storage
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode('gwngdfag9ds89g5da68v6x5fqe5849368'), // Replace this with a secure method of key management
+                { name: 'PBKDF2' },
+                false,
+                ['deriveKey']
+            );
+
+            return crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: new TextEncoder().encode('salt-value'), // Use a salt for better security
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
         // Check if a PIN is set, if not, prompt the user to set one
         if (!localStorage.getItem('pin')) {
             const newPin = prompt("Set your PIN for the first time:");
             if (newPin) {
-                localStorage.setItem('pin', newPin); // Save the new PIN
+                (async () => {
+                    const key = await getKey();
+                    const encryptedPin = await encryptPIN(newPin, key);
+                    localStorage.setItem('pin', JSON.stringify(Array.from(encryptedPin))); // Save the encrypted PIN
+                })();
             }
         }
 
@@ -118,40 +99,52 @@
             e.preventDefault();
             const pinInput = document.getElementById('pin').value;
 
-            // Retrieve the current PIN from local storage
-            const storedPin = localStorage.getItem('pin');
+            (async () => {
+                const key = await getKey();
+                const storedEncryptedPin = JSON.parse(localStorage.getItem('pin'));
 
-            if (pinInput === storedPin) {
-                // Set login status in sessionStorage
-                sessionStorage.setItem('loggedIn', 'true');
-                
-                // Redirect to main password manager page if PIN is correct
-                window.location.href = 'index.html';
-            } else {
-                // Show error message if PIN is incorrect
-                const errorMessage = document.getElementById('errorMessage');
-                errorMessage.textContent = 'Incorrect PIN. Please try again.';
-                errorMessage.style.display = 'block';
-            }
+                // Decrypt the stored PIN
+                const decryptedPin = await decryptPIN(new Uint8Array(storedEncryptedPin), key);
+
+                if (pinInput === decryptedPin) {
+                    // Set login status in sessionStorage
+                    sessionStorage.setItem('loggedIn', 'true');
+                    
+                    // Redirect to main password manager page if PIN is correct
+                    window.location.href = 'index.html';
+                } else {
+                    // Show error message if PIN is incorrect
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = 'Incorrect PIN. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+            })();
         });
 
         // Handle the PIN reset
         document.getElementById('resetPinBtn').addEventListener('click', function() {
             const oldPin = prompt("Enter your old PIN:");
-            
-            // Retrieve the current PIN from local storage
-            const storedPin = localStorage.getItem('pin');
 
-            if (oldPin === storedPin) {
-                const newPin = prompt("Enter your new PIN:");
-                if (newPin) {
-                    localStorage.setItem('pin', newPin); // Save the new PIN
-                    alert('PIN has been reset successfully!');
+            (async () => {
+                const key = await getKey();
+                const storedEncryptedPin = JSON.parse(localStorage.getItem('pin'));
+
+                // Decrypt the stored PIN
+                const decryptedPin = await decryptPIN(new Uint8Array(storedEncryptedPin), key);
+
+                if (oldPin === decryptedPin) {
+                    const newPin = prompt("Enter your new PIN:");
+                    if (newPin) {
+                        const encryptedPin = await encryptPIN(newPin, key);
+                        localStorage.setItem('pin', JSON.stringify(Array.from(encryptedPin))); // Save the new encrypted PIN
+                        alert('PIN has been reset successfully!');
+                    }
+                } else {
+                    alert('Old PIN is incorrect. Reset failed.');
                 }
-            } else {
-                alert('Old PIN is incorrect. Reset failed.');
-            }
+            })();
         });
+
     </script>
 </body>
 </html>
