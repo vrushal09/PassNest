@@ -6,7 +6,7 @@ PassNest is a local JavaScript-based password manager that allows you to securel
 
 - **Password Storage**: Add, view, and delete saved passwords, with encryption for security.
 - **Data Encryption**: All passwords are encrypted using AES (Advanced Encryption Standard) before storage.
-- **Local Storage**: Passwords are stored locally in your browser, so they remain private and only accessible on your device.
+- **Firebase Database**: Passwords are stored in Firebase realtime storage, so you can access it on any device.
 - **Copy to Clipboard**: Quickly copy passwords to the clipboard with a single click.
 - **Responsive UI**: Designed to be simple, minimalistic, and easy to use.
 
