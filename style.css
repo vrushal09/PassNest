@@ -110,3 +110,10 @@ form button:hover {
     background-color: #ccc;
     border-radius: 3px;
 }
+
+.details {
+    flex: 1;
+    text-align: left; /* Aligns text to the left */
+    font-size: 14px;
+    padding-right: 10px;
+}
